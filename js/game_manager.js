@@ -10,6 +10,9 @@ function GameManager(size, InputManager, Actuator, StorageManager) {
   this.inputManager.on("restart", this.restart.bind(this));
   this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
 
+  this.actuator.on("move", this.move.bind(this));
+  this.actuator.on("restart", this.restart.bind(this));
+
   this.setup();
 }
 
@@ -190,8 +193,9 @@ GameManager.prototype.move = function (direction) {
       this.over = true; // Game over!
     }
 
-    this.actuate();
+    // this.actuate();
   }
+  this.actuate();
 };
 
 // Get the vector representing the chosen direction

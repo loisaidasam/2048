@@ -1,22 +1,45 @@
 function HTMLActuator() {
+  this.events = {};
+
   this.tileContainer    = document.querySelector(".tile-container");
   this.scoreContainer   = document.querySelector(".score-container");
   this.bestContainer    = document.querySelector(".best-container");
   this.messageContainer = document.querySelector(".game-message");
 
   this.score = 0;
+  this.board = null;
 }
+
+HTMLActuator.prototype.on = function (event, callback) {
+  if (!this.events[event]) {
+    this.events[event] = [];
+  }
+  this.events[event].push(callback);
+};
+
+HTMLActuator.prototype.emit = function (event, data) {
+  var callbacks = this.events[event];
+  if (callbacks) {
+    callbacks.forEach(function (callback) {
+      callback(data);
+    });
+  }
+};
 
 HTMLActuator.prototype.actuate = function (grid, metadata) {
   var self = this;
 
   window.requestAnimationFrame(function () {
+    self.board = [];
     self.clearContainer(self.tileContainer);
 
     grid.cells.forEach(function (column) {
       column.forEach(function (cell) {
         if (cell) {
           self.addTile(cell);
+          self.board.push(cell.value);
+        } else {
+          self.board.push(0);
         }
       });
     });
@@ -25,6 +48,17 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
     self.updateBestScore(metadata.bestScore);
 
     if (metadata.terminated) {
+      console.log("Terminated with score " + metadata.score);
+      $.get("http://localhost:5000/finish", {score: metadata.score},
+        function (data, textStatus, jqXHR) {
+          console.log("finish result:" + data);
+          $.get("http://localhost:5000/start", {score: metadata.score},
+          function (data, textStatus, jqXHR) {
+            console.log("start result:" + data);
+            self.emit("restart");
+          });
+        }
+      );
       if (metadata.over) {
         self.message(false); // You lose
       } else if (metadata.won) {
@@ -32,6 +66,7 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
       }
     }
 
+    self.updatePosition(self.board);
   });
 };
 
@@ -122,6 +157,23 @@ HTMLActuator.prototype.updateScore = function (score) {
 
 HTMLActuator.prototype.updateBestScore = function (bestScore) {
   this.bestContainer.textContent = bestScore;
+};
+
+HTMLActuator.prototype.updatePosition = function (board) {
+  var self = this;
+  var boardStr = board.join();
+  $.get(
+    "http://localhost:5000/next",
+    {
+      board: boardStr,
+    },
+    function (data, textStatus, jqXHR) {
+      console.log("boardStr: " + boardStr + " | next move: " + data);
+      window.setTimeout(function () {
+        self.emit("move", data);
+      }, 500);
+    }
+  );
 };
 
 HTMLActuator.prototype.message = function (won) {
