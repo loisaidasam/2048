@@ -52,11 +52,13 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
       $.get("http://localhost:5000/finish", {score: metadata.score},
         function (data, textStatus, jqXHR) {
           console.log("finish result:" + data);
-          $.get("http://localhost:5000/start", {score: metadata.score},
-          function (data, textStatus, jqXHR) {
-            console.log("start result:" + data);
-            self.emit("restart");
-          });
+          window.setTimeout(function () {
+            $.get("http://localhost:5000/start", {score: metadata.score},
+            function (data, textStatus, jqXHR) {
+              console.log("start result:" + data);
+              self.emit("restart");
+            });
+          }, 3000);
         }
       );
       if (metadata.over) {
