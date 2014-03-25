@@ -1,6 +1,6 @@
-function GameManager(size, brain, InputManager, Actuator, StorageManager) {
+function GameManager(size, InputManager, Actuator, StorageManager, Brain) {
   this.size           = size; // Size of the grid
-  this.brain          = brain;
+  this.brain          = new Brain;
   this.inputManager   = new InputManager;
   this.storageManager = new StorageManager;
   this.actuator       = new Actuator;

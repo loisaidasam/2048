@@ -1,7 +1,11 @@
-function AutonomousBrain(host, nextMoveTimeout, restartTimeout) {
-  this.host = host;
-  this.nextMoveTimeout = nextMoveTimeout;
-  this.restartTimeout = restartTimeout;
+function AutonomousBrain() {
+  // this.host = "http://brain-2048.herokuapp.com";
+  this.host = "http://localhost:5000";
+  this.nextMoveTimeout = 500;
+  this.restartTimeout = 3000;
+  this.maxRetries = 5;
+  this.retrySleeptime = 2000;
+
   this.events = {};
   this.gameId = null;
   this.score = 0;
@@ -53,26 +57,42 @@ AutonomousBrain.prototype.callServer = function () {
   var self = this;
   var nextMove = null;
   var boardStr = null;
+  var retries = 0;
 
   if (! this.board) {
     return;
   }
 
   boardStr = this.board.join();
-  nextMove = $.ajax({
-    type: "GET",
-    url: this.host + "/next",
-    data: {
-      id: this.gameId,
-      board: boardStr,
-    },
-    async: false,
-  }).responseText;
 
-  console.log("boardStr: " + boardStr + " | nextMove: " + nextMove);
-  window.setTimeout(function () {
-    self.emit("move", nextMove);
-  }, this.nextMoveTimeout);
+  function getNextMove() {
+    var result = $.ajax({
+      type: "GET",
+      url: self.host + "/next",
+      data: {
+        id: self.gameId,
+        board: boardStr,
+      },
+      async: false,
+    }).responseText;
+    result = parseInt(result)
+    nextMove = isNaN(result) ? -1 : result;
+    if (nextMove === -1) {
+      if (retries < self.maxRetries) {
+        console.log("Failed to get next move (" + (self.maxRetries - retries) + " retries left)");
+        retries++;
+        window.setTimeout(getNextMove, self.retrySleeptime);
+      } else {
+        console.log("Giving up after " + retries + " retries :(");
+      }
+    } else {
+      console.log("boardStr: " + boardStr + " | nextMove: " + nextMove);
+      window.setTimeout(function () {
+        self.emit("move", nextMove);
+      }, self.nextMoveTimeout);
+    }
+  }
+  getNextMove();
 };
 
 AutonomousBrain.prototype.start = function () {
