@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 
-import os
-
 from flask import Flask, request
 
 from game import Game
+import settings
 
 
-PY_DIR = os.path.dirname(os.path.realpath(__file__))
-BASE_DIR = os.path.join(PY_DIR, '..')
-app = Flask(__name__, static_url_path='', static_folder=BASE_DIR)
+app = Flask(__name__, static_url_path='', static_folder=settings.BASE_DIR)
 games = {}
 
 
@@ -45,5 +42,5 @@ def finish():
 
 
 if __name__ == "__main__":
-    app.debug = True
-    app.run(host="0.0.0.0", port=5000)
+    app.debug = settings.DEBUG
+    app.run(host=settings.HOST, port=settings.PORT)
