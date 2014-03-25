@@ -26,7 +26,7 @@ class Game(object):
     def finish(self, score):
         self.score = score
         print "After %s total moves, received score of %s" % (len(self.moves), self.score)
-        high_tile = max(self.moves[-1])
+        high_tile = max(self.moves[-1][0])
         filename = "%s_%s_%s_%s.csv" % (self.id,
                                         self.score,
                                         len(self.moves),
