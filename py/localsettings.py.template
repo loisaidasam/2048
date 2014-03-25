@@ -1,0 +1,5 @@
+# localsettings.py.template
+# copy this to localsettings.py if you want to change the settings
+
+# For example, if you wanted to set something like this:
+STORE_GAMES = True
