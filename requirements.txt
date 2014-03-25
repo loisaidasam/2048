@@ -1,0 +1,4 @@
+Flask==0.10.1
+
+# TODO:
+#PyBrain==0.3
