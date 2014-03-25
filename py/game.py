@@ -26,9 +26,13 @@ class Game(object):
     def finish(self, score):
         self.score = score
         print "After %s total moves, received score of %s" % (len(self.moves), self.score)
-
-        filename = os.path.join(settings.GAMES_DIR, "%s_%s.csv" % (self.id, self.score))
+        high_tile = max(self.moves[-1])
+        filename = "%s_%s_%s_%s.csv" % (self.id,
+                                        self.score,
+                                        len(self.moves),
+                                        high_tile)
+        filename = os.path.join(settings.GAMES_DIR, filename)
         with open(filename, 'w') as fp:
             writer = csv.writer(fp)
             for board, choice in self.moves:
-                writer.writerow([board, choice])
+                writer.writerow([list(board) + [choice]])
