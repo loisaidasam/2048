@@ -4,6 +4,8 @@ function AutonomousBrain(host, nextMoveTimeout, restartTimeout) {
   this.restartTimeout = restartTimeout;
   this.events = {};
   this.score = 0;
+  this.board = null;
+  this.paused = false;
 }
 
 AutonomousBrain.prototype.on = function (event, callback) {
@@ -24,25 +26,37 @@ AutonomousBrain.prototype.emit = function (event, data) {
 
 AutonomousBrain.prototype.update = function (grid, terminated, score) {
   var self = this;
-  var board = [];
-  var boardStr = null;
 
   if (terminated) {
     this.finish(score);
     return;
   }
 
+  this.board = [];
   grid.cells.forEach(function (column) {
     column.forEach(function (cell) {
       if (cell) {
-        board.push(cell.value);
+        self.board.push(cell.value);
       } else {
-        board.push(0);
+        self.board.push(0);
       }
     });
   });
-  boardStr = board.join();
 
+  if (! this.paused) {
+    this.callServer();
+  }
+};
+
+AutonomousBrain.prototype.callServer = function () {
+  var self = this;
+  var boardStr = null;
+
+  if (! this.board) {
+    return;
+  }
+
+  boardStr = this.board.join()
   $.get(
     this.host + "/next",
     {
@@ -80,3 +94,10 @@ AutonomousBrain.prototype.finish = function (score) {
     }
   );
 };
+
+AutonomousBrain.prototype.pause = function () {
+  this.paused = ! this.paused;
+  if (! this.paused) {
+    this.callServer();
+  }
+}

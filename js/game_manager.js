@@ -15,6 +15,8 @@ function GameManager(size, brain, InputManager, Actuator, StorageManager) {
   this.brain.on("move", this.move.bind(this));
   this.brain.on("restart", this.restart.bind(this));
 
+  this.inputManager.on("pause", this.brain.pause.bind(this.brain));
+
   this.setup();
 }
 
