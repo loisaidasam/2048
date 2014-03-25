@@ -1,8 +1,9 @@
 function AutonomousBrain(host, nextMoveTimeout, restartTimeout) {
-  this.host = host
+  this.host = host;
   this.nextMoveTimeout = nextMoveTimeout;
   this.restartTimeout = restartTimeout;
   this.events = {};
+  this.gameId = null;
   this.score = 0;
   this.board = null;
   this.paused = false;
@@ -50,49 +51,62 @@ AutonomousBrain.prototype.update = function (grid, terminated, score) {
 
 AutonomousBrain.prototype.callServer = function () {
   var self = this;
+  var nextMove = null;
   var boardStr = null;
 
   if (! this.board) {
     return;
   }
 
-  boardStr = this.board.join()
-  $.get(
-    this.host + "/next",
-    {
+  boardStr = this.board.join();
+  nextMove = $.ajax({
+    type: "GET",
+    url: this.host + "/next",
+    data: {
+      id: this.gameId,
       board: boardStr,
     },
-    function (data, textStatus, jqXHR) {
-      console.log("boardStr: " + boardStr + " | next move: " + data);
-      window.setTimeout(function () {
-        self.emit("move", data);
-      }, self.nextMoveTimeout);
-    }
-  );
+    async: false,
+  }).responseText;
+
+  console.log("boardStr: " + boardStr + " | nextMove: " + nextMove);
+  window.setTimeout(function () {
+    self.emit("move", nextMove);
+  }, this.nextMoveTimeout);
 };
 
 AutonomousBrain.prototype.start = function () {
-  var self = this;
-
-  $.get(this.host + "/start", {},
-  function (data, textStatus, jqXHR) {
-    console.log("Start result:" + data);
-    self.emit("restart");
-  });
+  this.gameId = $.ajax({
+    type: "GET",
+    url: this.host + "/start",
+    async: false,
+  }).responseText;
+  console.log("Start result:" + this.gameId);
 };
 
 AutonomousBrain.prototype.finish = function (score) {
   var self = this;
+  var response = null;
 
   console.log("Finished with score " + score);
-  $.get(this.host + "/finish", {score: score},
-    function (data, textStatus, jqXHR) {
-      console.log("Finish result:" + data);
-      window.setTimeout(function () {
-        self.start();
-      }, self.restartTimeout);
-    }
-  );
+  response = $.ajax({
+    type: "GET",
+    url: this.host + "/finish",
+    data: {
+      score: score,
+      id: this.gameId,
+    },
+    async: false,
+  }).responseText;
+
+  console.log("Finish response:" + response);
+  window.setTimeout(function () {
+    self.restart();
+  }, self.restartTimeout);
+};
+
+AutonomousBrain.prototype.restart = function() {
+    this.emit("restart");
 };
 
 AutonomousBrain.prototype.pause = function () {

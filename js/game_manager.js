@@ -16,6 +16,7 @@ function GameManager(size, brain, InputManager, Actuator, StorageManager) {
   this.brain.on("restart", this.restart.bind(this));
 
   this.inputManager.on("pause", this.brain.pause.bind(this.brain));
+  this.inputManager.on("restart", this.brain.start.bind(this.brain));
 
   this.setup();
 }
@@ -64,6 +65,9 @@ GameManager.prototype.setup = function () {
     // Add the initial tiles
     this.addStartTiles();
   }
+
+  // Let the brain know
+  this.brain.start();
 
   // Update the actuator
   this.actuate();

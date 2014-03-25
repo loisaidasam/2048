@@ -2,6 +2,7 @@
 
 import os
 import random
+import uuid
 
 from flask import Flask, request
 
@@ -12,19 +13,19 @@ class Game(object):
 
     CHOICES = (0, 1, 2, 3)
 
-    def __init__(self):
-        self.init()
-
-    def init(self):
+    def __init__(self, id=None):
+        self.id = id or str(uuid.uuid4())
         self.moves = {}
         self.total_moves = 0
         self.score = None
 
-    def add_position(self, board, choice):
+    def update(self, board):
         if not board in self.moves:
             self.moves[board] = []
+        choice = random.choice(Game.CHOICES)
         self.moves[board].append(choice)
         self.total_moves += 1
+        return choice
 
     def finish(self, score):
         self.score = score
@@ -34,7 +35,7 @@ class Game(object):
 PY_DIR = os.path.dirname(os.path.realpath(__file__))
 BASE_DIR = os.path.join(PY_DIR, '..')
 app = Flask(__name__, static_url_path='', static_folder=BASE_DIR)
-game = Game()
+games = {}
 
 
 @app.route('/')
@@ -44,22 +45,27 @@ def index():
 
 @app.route("/start")
 def start():
-    game.init()
-    return "OK"
+    game = Game()
+    games[game.id] = game
+    return game.id
 
 
 @app.route("/next")
 def next():
+    id = request.args.get('id')
     board = tuple(request.args.get('board', '').split(','))
-    choice = random.choice(Game.CHOICES)
-    game.add_position(board, choice)
+    game = games.get(id) or Game(id)
+    choice = game.update(board)
     return str(choice)
 
 
 @app.route("/finish")
 def finish():
+    id = request.args.get('id')
+    if not id in games:
+        return "GAME NOT FOUND"
     score = request.args.get('score')
-    game.finish(score)
+    games[id].finish(score)
     return "OK"
 
 
