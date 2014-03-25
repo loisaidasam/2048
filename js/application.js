@@ -2,7 +2,7 @@
 $(document).ready(function () {
   console.log("READY!");
   window.requestAnimationFrame(function () {
-    actuator = new HTMLActuator("http://localhost:5000")
-    new GameManager(4, KeyboardInputManager, actuator, LocalStorageManager);
+    brain = new AutonomousBrain("http://localhost:5000", 500, 3000);
+    new GameManager(4, brain, KeyboardInputManager, HTMLActuator, LocalStorageManager);
   });
 });
