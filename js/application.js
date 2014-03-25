@@ -2,6 +2,7 @@
 $(document).ready(function () {
   console.log("READY!");
   window.requestAnimationFrame(function () {
-    new GameManager(4, KeyboardInputManager, HTMLActuator, LocalStorageManager);
+    actuator = new HTMLActuator("http://localhost:5000")
+    new GameManager(4, KeyboardInputManager, actuator, LocalStorageManager);
   });
 });

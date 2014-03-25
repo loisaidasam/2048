@@ -1,4 +1,5 @@
-function HTMLActuator() {
+function HTMLActuator(host) {
+  this.host = host
   this.events = {};
 
   this.tileContainer    = document.querySelector(".tile-container");
@@ -49,11 +50,11 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
 
     if (metadata.terminated) {
       console.log("Terminated with score " + metadata.score);
-      $.get("http://localhost:5000/finish", {score: metadata.score},
+      $.get(self.host + "/finish", {score: metadata.score},
         function (data, textStatus, jqXHR) {
           console.log("finish result:" + data);
           window.setTimeout(function () {
-            $.get("http://localhost:5000/start", {score: metadata.score},
+            $.get(self.host + "/start", {score: metadata.score},
             function (data, textStatus, jqXHR) {
               console.log("start result:" + data);
               self.emit("restart");
@@ -165,7 +166,7 @@ HTMLActuator.prototype.updatePosition = function (board) {
   var self = this;
   var boardStr = board.join();
   $.get(
-    "http://localhost:5000/next",
+    self.host + "/next",
     {
       board: boardStr,
     },
