@@ -1,6 +1,6 @@
 function AutonomousBrain() {
-  // this.host = "http://brain-2048.herokuapp.com";
-  this.host = "http://localhost:5000";
+  this.host = "http://brain-2048.herokuapp.com";
+  // this.host = "http://localhost:5000";
   this.nextMoveTimeout = 500;
   this.restartTimeout = 3000;
   this.maxRetries = 5;
