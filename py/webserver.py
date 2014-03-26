@@ -41,6 +41,12 @@ def finish():
     return "OK"
 
 
+@app.after_request
+def inject_header(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+
 if __name__ == "__main__":
     app.debug = settings.DEBUG
     app.run(host=settings.HOST, port=settings.PORT)
