@@ -37,26 +37,28 @@ GameManager.prototype.isGameTerminated = function () {
 
 // Set up the game
 GameManager.prototype.setup = function () {
-  var previousState = this.storageManager.getGameState();
+  // var previousState = this.storageManager.getGameState();
 
-  // Reload the game from a previous game if present
-  if (previousState) {
-    this.grid        = new Grid(previousState.grid.size,
-                                previousState.grid.cells); // Reload grid
-    this.score       = previousState.score;
-    this.over        = previousState.over;
-    this.won         = previousState.won;
-    this.keepPlaying = previousState.keepPlaying;
-  } else {
-    this.grid        = new Grid(this.size);
-    this.score       = 0;
-    this.over        = false;
-    this.won         = false;
-    this.keepPlaying = false;
+  // // Reload the game from a previous game if present
+  // if (previousState) {
+  //   this.grid        = new Grid(previousState.grid.size,
+  //                               previousState.grid.cells); // Reload grid
+  //   this.score       = previousState.score;
+  //   this.over        = previousState.over;
+  //   this.won         = previousState.won;
+  //   this.keepPlaying = previousState.keepPlaying;
+  // } else {
+  this.grid        = new Grid(this.size);
+  this.score       = 0;
+  this.over        = false;
+  this.won         = false;
+  this.keepPlaying = false;
 
-    // Add the initial tiles
+  // Add the initial tiles
+  if (this.inputManager.randomReady()) {
     this.addStartTiles();
   }
+  // }
 
   // Update the actuator
   this.actuate();
@@ -72,8 +74,8 @@ GameManager.prototype.addStartTiles = function () {
 // Adds a tile in a random position
 GameManager.prototype.addRandomTile = function () {
   if (this.grid.cellsAvailable()) {
-    var value = Math.random() < 0.9 ? 2 : 4;
-    var tile = new Tile(this.grid.randomAvailableCell(), value);
+    var value = this.inputManager.getRandom() < 0.9 ? 2 : 4;
+    var tile = new Tile(this.grid.randomAvailableCell(this.inputManager), value);
 
     this.grid.insertTile(tile);
   }
