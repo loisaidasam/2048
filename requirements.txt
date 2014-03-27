@@ -4,4 +4,4 @@ gunicorn==18.0
 
 requests==2.2.1
 
-git+git://github.com/rcrdclub/pusher_client_python.git@c86b2ca3dc0e3673d90efde6f72a14b4ac0b9983
+#git+git://github.com/rcrdclub/pusher_client_python.git@c86b2ca3dc0e3673d90efde6f72a14b4ac0b9983
