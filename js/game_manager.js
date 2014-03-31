@@ -10,7 +10,7 @@ function GameManager(size, startingMoves, InputManager, Actuator, StorageManager
 
   this.handleStartingMoves(startingMoves);
 
-  this.inputManager = new InputManager;
+  this.inputManager = new InputManager(this.randomManager);
   this.inputManager.on("move", this.move.bind(this));
   this.inputManager.on("restart", this.restart.bind(this));
   // this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));

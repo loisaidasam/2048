@@ -1,9 +1,9 @@
-function PusherInputManager() {
+function PusherInputManager(randomManager) {
   this.pusherKey = "8655799553dbf4825655";
   this.pusherChannel = "test_channel";
 
   this.events = {};
-  this.randomPool = [];
+  this.randomManager = randomManager;
 
   Pusher.log = function (message) {
     if (window.console && window.console.log) {
@@ -17,7 +17,7 @@ function PusherInputManager() {
   channel.bind("command", function (data) {
     window.console.log("Pusher update!");
     window.console.log(data);
-    self.randomPool = data.random;
+    self.randomManager.setRandom(data.random);
     var moveMap = {
       "up": 0,
       "right": 1,
