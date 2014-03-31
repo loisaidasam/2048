@@ -14,10 +14,11 @@ class Game(object):
     ALLOWED_COMMANDS = ('up', 'right', 'down', 'left', 'restart')
 
     def __init__(self):
-        self.restart()
+        self.moves = cache.get('moves') or []
 
     def restart(self):
-        self.moves = cache.get('moves') or []
+        self.moves = []
+        cache.set('moves', self.moves)
 
     def move(self, data):
         self.moves.append(data)
