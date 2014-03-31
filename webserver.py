@@ -36,15 +36,16 @@ def send_push(data):
 @app.route('/')
 def index():
     starting_moves = json.dumps(game.moves)
-    print "starting_moves: %s" % starting_moves
     return render_template('index.html', starting_moves=starting_moves)
 
 
 @app.route("/api")
 def api():
+    sender = request.args.get('sender')
     command = request.args.get('command')
+    print "%s: %s" % (sender, command)
     data = {
-        'sender': request.args.get('sender'),
+        'sender': sender,
         'command': command,
         'random': [random.random() for x in xrange(settings.RANDOM_NUMBERS_SIZE)],
     }
