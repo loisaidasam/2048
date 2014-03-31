@@ -4,6 +4,7 @@ import json
 import random
 
 from flask import Flask, render_template, request
+from flask.ext.cacheify import init_cacheify
 import pusher
 
 import settings
@@ -16,17 +17,20 @@ class Game(object):
         self.restart()
 
     def restart(self):
-        self.moves = []
+        self.moves = cache.get('moves') or []
 
     def move(self, data):
         self.moves.append(data)
+        cache.set('moves', self.moves)
 
 
-game = Game()
 app = Flask(__name__, static_url_path='', static_folder=settings.BASE_DIR)
+cache = init_cacheify(app)
 pusher_client = pusher.Pusher(app_id=settings.PUSHER_APP_ID,
                               key=settings.PUSHER_KEY,
                               secret=settings.PUSHER_SECRET)
+
+game = Game()
 
 
 def send_push(data):
