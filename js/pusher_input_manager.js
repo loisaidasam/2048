@@ -24,14 +24,13 @@ function PusherInputManager() {
       "down": 2,
       "left": 3,
     };
+    var buttonText = data.sender + ": " + data.command;
     if (moveMap[data.command] !== undefined) {
-      self.changeText(data.sender + ": " + data.command);
-      self.emit("move", moveMap[data.command]);
+      self.emit("move", moveMap[data.command], buttonText);
       return;
     }
     if (data.command === "restart") {
-      self.changeText(data.sender + ": restart");
-      self.emit("restart");
+      self.emit("restart", buttonText);
       return;
     }
   });
@@ -44,28 +43,11 @@ PusherInputManager.prototype.on = function (event, callback) {
   this.events[event].push(callback);
 };
 
-PusherInputManager.prototype.emit = function (event, data) {
+PusherInputManager.prototype.emit = function (event, data1, data2) {
   var callbacks = this.events[event];
   if (callbacks) {
     callbacks.forEach(function (callback) {
-      callback(data);
+      callback(data1, data2);
     });
   }
-};
-
-PusherInputManager.prototype.changeText = function (text) {
-  document.getElementById("restart-button").innerHTML = text;
-};
-
-// Need to synchronize "random" data for deterministic results
-PusherInputManager.prototype.getRandom = function () {
-  if (this.randomPool.length === 0) {
-    window.console.log("Empty random pool :(");
-    return Math.random();
-  }
-  return this.randomPool.shift();
-};
-
-PusherInputManager.prototype.randomReady = function () {
-  return this.randomPool.length !== 0;
 };

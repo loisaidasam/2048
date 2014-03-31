@@ -21,6 +21,10 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
       });
     });
 
+    if (metadata.buttonText) {
+      self.changeButtonText(metadata.buttonText);
+    }
+
     self.updateScore(metadata.score);
     self.updateBestScore(metadata.bestScore);
 
@@ -136,4 +140,8 @@ HTMLActuator.prototype.clearMessage = function () {
   // IE only takes one value to remove at a time.
   this.messageContainer.classList.remove("game-won");
   this.messageContainer.classList.remove("game-over");
+};
+
+HTMLActuator.prototype.changeButtonText = function (text) {
+  document.getElementById("restart-button").innerHTML = text;
 };

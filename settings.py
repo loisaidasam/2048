@@ -1,8 +1,7 @@
 
 import os
 
-PY_DIR = os.path.dirname(os.path.realpath(__file__))
-BASE_DIR = os.path.join(PY_DIR, '..')
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 DEBUG = True
 HOST = "0.0.0.0"
@@ -13,4 +12,4 @@ PUSHER_KEY = os.environ['PUSHER_KEY']
 PUSHER_SECRET = os.environ['PUSHER_SECRET']
 PUSHER_CHANNEL = os.environ['PUSHER_CHANNEL']
 
-RANDOM_NUMBERS_SIZE = 5
+RANDOM_NUMBERS_SIZE = 4

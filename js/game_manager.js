@@ -1,20 +1,51 @@
-function GameManager(size, InputManager, Actuator, StorageManager) {
+function GameManager(size, startingMoves, InputManager, Actuator, StorageManager) {
   this.size           = size; // Size of the grid
-  this.inputManager   = new InputManager;
+  this.randomManager  = new RandomManager;
   this.storageManager = new StorageManager;
   this.actuator       = new Actuator;
 
   this.startTiles     = 2;
 
+  this.setup();
+
+  this.handleStartingMoves(startingMoves);
+
+  this.inputManager = new InputManager;
   this.inputManager.on("move", this.move.bind(this));
   this.inputManager.on("restart", this.restart.bind(this));
-  this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
-
-  this.setup();
+  // this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
 }
 
+// Handle initial starting moves (from server)
+GameManager.prototype.handleStartingMoves = function (startingMoves) {
+  // window.console.log("handleStartingMoves()");
+  // window.console.log(startingMoves);
+  var moveMap = {
+    "up": 0,
+    "right": 1,
+    "down": 2,
+    "left": 3,
+  };
+  var data;
+  var buttonText;
+  for (var i = 0; i < startingMoves.length; i++) {
+    data = startingMoves[i];
+    window.console.log(data);
+    this.randomManager.setRandom(data.random);
+    if (moveMap[data.command] !== undefined) {
+      buttonText = data.sender + ": " + data.command;
+      this.move(moveMap[data.command], buttonText);
+    }
+    else if (data.command === "restart") {
+      buttonText = data.sender + ": restart";
+      this.restart(buttonText);
+    }
+  }
+};
+
 // Restart the game
-GameManager.prototype.restart = function () {
+GameManager.prototype.restart = function (buttonText) {
+  this.buttonText = typeof buttonText !== 'undefined' ? buttonText : null;
   this.storageManager.clearGameState();
   this.actuator.continueGame(); // Clear the game won/lost message
   this.setup();
@@ -53,9 +84,10 @@ GameManager.prototype.setup = function () {
   this.over        = false;
   this.won         = false;
   this.keepPlaying = false;
+  this.buttonText  = null;
 
   // Add the initial tiles
-  if (this.inputManager.randomReady()) {
+  if (this.randomManager.randomReady()) {
     this.addStartTiles();
   }
   // }
@@ -74,8 +106,8 @@ GameManager.prototype.addStartTiles = function () {
 // Adds a tile in a random position
 GameManager.prototype.addRandomTile = function () {
   if (this.grid.cellsAvailable()) {
-    var value = this.inputManager.getRandom() < 0.9 ? 2 : 4;
-    var tile = new Tile(this.grid.randomAvailableCell(this.inputManager), value);
+    var value = this.randomManager.getRandom() < 0.9 ? 2 : 4;
+    var tile = new Tile(this.grid.randomAvailableCell(this.randomManager), value);
 
     this.grid.insertTile(tile);
   }
@@ -99,7 +131,8 @@ GameManager.prototype.actuate = function () {
     over:       this.over,
     won:        this.won,
     bestScore:  this.storageManager.getBestScore(),
-    terminated: this.isGameTerminated()
+    terminated: this.isGameTerminated(),
+    buttonText: this.buttonText
   });
 
 };
@@ -133,7 +166,7 @@ GameManager.prototype.moveTile = function (tile, cell) {
 };
 
 // Move tiles on the grid in the specified direction
-GameManager.prototype.move = function (direction) {
+GameManager.prototype.move = function (direction, buttonText) {
   // 0: up, 1: right, 2: down, 3: left
   var self = this;
 
@@ -144,6 +177,8 @@ GameManager.prototype.move = function (direction) {
   var vector     = this.getVector(direction);
   var traversals = this.buildTraversals(vector);
   var moved      = false;
+
+  this.buttonText = typeof buttonText !== 'undefined' ? buttonText : null;
 
   // Save the current tile positions and remove merger information
   this.prepareTiles();
