@@ -1,32 +1,35 @@
 #!/usr/bin/env python
 
 import json
+import pickle
 import random
 
 from flask import Flask, render_template, request
-from flask.ext.cacheify import init_cacheify
 import pusher
+import redis
 
 import settings
+
+conn = redis.from_url(settings.REDIS_URL)
+KEY = 'moves'
 
 
 class Game(object):
     ALLOWED_COMMANDS = ('up', 'right', 'down', 'left', 'restart')
 
-    def __init__(self):
-        self.moves = cache.get('moves') or []
-
     def restart(self):
-        self.moves = []
-        cache.set('moves', self.moves)
+        return conn.delete(KEY)
 
     def move(self, data):
-        self.moves.append(data)
-        cache.set('moves', self.moves)
+        return conn.rpush(KEY, pickle.dumps(data))
+
+    @property
+    def moves(self):
+        result = conn.lrange(KEY, 0, -1) or []
+        return map(pickle.loads, result)
 
 
 app = Flask(__name__, static_url_path='', static_folder=settings.BASE_DIR)
-cache = init_cacheify(app)
 pusher_client = pusher.Pusher(app_id=settings.PUSHER_APP_ID,
                               key=settings.PUSHER_KEY,
                               secret=settings.PUSHER_SECRET)
@@ -56,8 +59,8 @@ def api():
     }
     if command in Game.ALLOWED_COMMANDS:
         if command == 'restart':
-            game.restart()
-        game.move(data)
+            print "restart: ", game.restart()
+        print "move: ", game.move(data)
         send_push(data)
     return "OK"
 
