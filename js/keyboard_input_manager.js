@@ -66,6 +66,11 @@ KeyboardInputManager.prototype.listen = function () {
     if (!modifiers && event.which === 82) {
       self.restart.call(self, event);
     }
+
+    // p key pauses/unpauses the brain
+    if (!modifiers && event.which === 80) {
+      self.emit("pause");
+    }
   });
 
   // Respond to button presses

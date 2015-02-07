@@ -1,14 +1,22 @@
-function GameManager(size, InputManager, Actuator, StorageManager) {
+function GameManager(size, InputManager, Actuator, StorageManager, Brain) {
   this.size           = size; // Size of the grid
+  this.brain          = new Brain;
   this.inputManager   = new InputManager;
   this.storageManager = new StorageManager;
   this.actuator       = new Actuator;
 
+  this.restorePreviousState = false;
   this.startTiles     = 2;
 
   this.inputManager.on("move", this.move.bind(this));
   this.inputManager.on("restart", this.restart.bind(this));
   this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
+
+  this.brain.on("move", this.move.bind(this));
+  this.brain.on("restart", this.restart.bind(this));
+
+  this.inputManager.on("pause", this.brain.pause.bind(this.brain));
+  this.inputManager.on("restart", this.brain.start.bind(this.brain));
 
   this.setup();
 }
@@ -37,7 +45,7 @@ GameManager.prototype.isGameTerminated = function () {
 
 // Set up the game
 GameManager.prototype.setup = function () {
-  var previousState = this.storageManager.getGameState();
+  var previousState = this.restorePreviousState ? this.storageManager.getGameState() : null;
 
   // Reload the game from a previous game if present
   if (previousState) {
@@ -57,6 +65,9 @@ GameManager.prototype.setup = function () {
     // Add the initial tiles
     this.addStartTiles();
   }
+
+  // Let the brain know
+  this.brain.start();
 
   // Update the actuator
   this.actuate();
@@ -100,6 +111,7 @@ GameManager.prototype.actuate = function () {
     terminated: this.isGameTerminated()
   });
 
+  this.brain.update(this.grid, this.isGameTerminated(), this.score);
 };
 
 // Represent the current game as an object
@@ -190,8 +202,9 @@ GameManager.prototype.move = function (direction) {
       this.over = true; // Game over!
     }
 
-    this.actuate();
+    // this.actuate();
   }
+  this.actuate();
 };
 
 // Get the vector representing the chosen direction

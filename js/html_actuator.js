@@ -11,6 +11,7 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
   var self = this;
 
   window.requestAnimationFrame(function () {
+    self.board = [];
     self.clearContainer(self.tileContainer);
 
     grid.cells.forEach(function (column) {
@@ -31,7 +32,6 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
         self.message(true); // You win!
       }
     }
-
   });
 };
 
